@@ -2,10 +2,31 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+
+char * integerDecimal2Binary(int integerNumber, int *integerNumberTwoSize) {
+    int integerNumber4integerNumberTwoSize = integerNumber;
+    int integerNumber4integerNumberTwo = integerNumber;
+    while (integerNumber4integerNumberTwoSize > 0) {
+        (*integerNumberTwoSize)++;
+        integerNumber4integerNumberTwoSize = integerNumber4integerNumberTwoSize / 2;
+    }
+    char *integerNumberTwo = (char *)malloc(((*integerNumberTwoSize) + 1) * sizeof(char));
+    int integerNumberTwoInd = (*integerNumberTwoSize);
+    while (integerNumber4integerNumberTwo > 0) {
+        integerNumberTwo[integerNumberTwoInd - 1] = (integerNumber4integerNumberTwo % 2) + '0';
+        integerNumber4integerNumberTwo = integerNumber4integerNumberTwo / 2;
+        integerNumberTwoInd--;
+    }
+    integerNumberTwo[(*integerNumberTwoSize)] = '\0';
+    
+    return integerNumberTwo;
+}
+
 void separator(double number, long *integerNumber, long *fractionalNumber) {
     char numberCount = snprintf(NULL, 0 , "%.16g", number);
     char *numberString = (char *)malloc((numberCount + 1) * sizeof(char));
     snprintf(numberString, numberCount + 1, "%.16g", number);
+
     int integerPartCount = 0;
     int fractionalPartCount = 0;
     int isIntegerPart = true;
@@ -64,8 +85,12 @@ int main () {
     long integerNumber, fractionalNumber;
 
     separator(number, &integerNumber, &fractionalNumber);
-    printf("integerPart: %d \n", integerNumber);
-    printf("fractionalPart: %d", fractionalNumber);
+
+    int integerNumberTwoSize = 0;
+    
+    char * integerNumberBinary = integerDecimal2Binary(integerNumber, &integerNumberTwoSize);
+
+    printf("integerNumberBinary: %s", integerNumberBinary);
 
     return 0;
 }
