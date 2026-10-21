@@ -123,5 +123,9 @@ int main () {
     frac2Bin(fracPart, fracPartlen, &fracPartBin);
     
     printf("fractionalNumberBinary: %s", fracPartBin);
+
+    int sign;
+    sign = (num >= 0) ? 0 : 1;
+
     return 0;
 }
