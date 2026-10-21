@@ -4,136 +4,124 @@
 
 
 
-void separator(double number, long *integerNumber, long *fractionalNumber, int * fractionalPartCount) {
-    char numberCount = snprintf(NULL, 0 , "%.16g", number);
-    char *numberString = (char *)malloc((numberCount + 1) * sizeof(char));
-    snprintf(numberString, numberCount + 1, "%.16g", number);
+char *double2char(double num) {
+    int numLen = snprintf(NULL, 0 , "%.16g", num);
+    char *numStr = (char *)malloc((numLen + 1) * sizeof(char));
+    snprintf(numStr, numLen + 1, "%.16g", num);
 
-    int integerPartCount = 0;
-    int isIntegerPart = true;
-    for (int i = 0; i < numberCount; i++) {
-        if (numberString[i] == '.') {
-            isIntegerPart = false;
+    return numStr;
+}
+
+void separator(double num, long *intPart, long *fracPart, int *fracPartLen) {
+    char *numStr = double2char(num);
+    int numLen = snprintf(NULL, 0 , "%.16g", num);
+    int intPartLen = 0;
+    bool isIntPart = true;
+
+    // START: Counter for the length of the integer and fractional parts.
+    for (int i = 0; i < numLen; i++) {
+        if (numStr[i] == '.') {
+            isIntPart = false;
             continue;
         }
-        isIntegerPart ? integerPartCount++ : (*fractionalPartCount)++;
-    }
-
-
-    char *integerPart = (char *)malloc((integerPartCount + 1) * sizeof(char));
-    char *fractionalPart = (char *)malloc(((*fractionalPartCount) + 1) * sizeof(char));
-    int integerIdx = 0;
-    int fractionalIdx = 0;
-    isIntegerPart = true;
-    for (int i = 0; i < numberCount; i++) {
-        if (numberString[i] == '.') {
-            isIntegerPart = false;
-            continue;
-        }
-        if (isIntegerPart) {
-            integerPart[integerIdx] = numberString[i];
-            integerIdx++;
+        if (isIntPart) {
+            intPartLen++;
         } else {
-            fractionalPart[fractionalIdx] = numberString[i];
-            fractionalIdx++;
+            (*fracPartLen)++;
+        }
+    }
+    // END: Counter for the length of the integer and fractional parts.
+
+    char *intPartStr = (char *)malloc((intPartLen + 1) * sizeof(char));
+    char *fracPartStr = (char *)malloc(((*fracPartLen) + 1) * sizeof(char));
+    int intIndex = 0;
+    int fracIndex = 0;
+    isIntPart = true;
+    for (int i = 0; i < numLen; i++) {
+        if (numStr[i] == '.') {
+            isIntPart = false;
+            continue;
+        }
+        if (isIntPart) {
+            intPartStr[intIndex++] = numStr[i];
+        } else {
+            fracPartStr[fracIndex++] = numStr[i];
         }
     }
 
-    integerPart[integerIdx] = '\0';
-    fractionalPart[fractionalIdx] = '\0';
+    intPartStr[intIndex] = '\0';
+    fracPartStr[fracIndex] = '\0';
 
+    *intPart = strtol(intPartStr, NULL, 10);
+    *fracPart = strtol(fracPartStr, NULL, 10);
 
-    *integerNumber = strtol(integerPart, NULL, 10);
-    *fractionalNumber = strtol(fractionalPart, NULL, 10);
-
-
- 
-
-    free(numberString);
-    free(integerPart);
-    free(fractionalPart);
+    free(numStr);
+    free(intPartStr);
+    free(fracPartStr);
 }
 
 
-char * integerDecimal2Binary(int integerNumber, int *integerNumberTwoSize) {
-    int integerNumber4integerNumberTwoSize = integerNumber;
-    int integerNumber4integerNumberTwo = integerNumber;
-    while (integerNumber4integerNumberTwoSize > 0) {
-        (*integerNumberTwoSize)++;
-        integerNumber4integerNumberTwoSize = integerNumber4integerNumberTwoSize / 2;
+char * int2Bin(long intPart, int *intBinLen) {
+    int tempForLen = intPart;
+    int tempForCovert = intPart;
+    while (tempForLen > 0) {
+        (*intBinLen)++;
+        tempForLen = tempForLen / 2;
     }
-    char *integerNumberTwo = (char *)malloc(((*integerNumberTwoSize) + 1) * sizeof(char));
-    int integerNumberTwoInd = (*integerNumberTwoSize);
-    while (integerNumber4integerNumberTwo > 0) {
-        integerNumberTwo[integerNumberTwoInd - 1] = (integerNumber4integerNumberTwo % 2) + '0';
-        integerNumber4integerNumberTwo = integerNumber4integerNumberTwo / 2;
-        integerNumberTwoInd--;
+    char *intPartBin = (char *)malloc(((*intBinLen) + 1) * sizeof(char));
+    int intPartBinIndex = (*intBinLen);
+    while (tempForCovert > 0) {
+        intPartBin[intPartBinIndex - 1] = (tempForCovert % 2) + '0';
+        tempForCovert /= 2;
+        intPartBinIndex--;
     }
-    integerNumberTwo[(*integerNumberTwoSize)] = '\0';
+    intPartBin[(*intBinLen)] = '\0';
     
-    return integerNumberTwo;
+    return intPartBin;
 }
 
 
 
-void fractionalDecimal2Binary(int fractionalNumber, int fractionalPartCount, char **fractionalNumberReady) {
-    char *fractionalNumberWithIntager = (char *)malloc((fractionalPartCount + 3) * sizeof(char));
-    fractionalNumberWithIntager[0] = '0';
-    fractionalNumberWithIntager[1] = '.';
-    char fractionalNumberCount = snprintf(NULL, 0 , "%.16g", fractionalNumber);
-    char *fractionalNumberString = (char *)malloc((fractionalPartCount + 1) * sizeof(char));
-    snprintf(fractionalNumberString, fractionalPartCount + 1, "%d", fractionalNumber); 
-    for (int i = 2; i < fractionalPartCount + 2; i++) {
-        fractionalNumberWithIntager[i] = fractionalNumberString[i - 2];
+void frac2Bin(long fracPart, int fracPartLen, char **fracPartBin) {
+    double fracNum = fracPart;
+    for (int i = 0; i < fracPartLen; i++) {
+        fracNum /= 10.0;
     }
-    fractionalNumberWithIntager[fractionalPartCount + 2] = '\0';
-    double fractionalNumberWithIntagerInteger = strtod(fractionalNumberWithIntager, NULL);
-    long fractionalNumberWithIntagerIntegerIntegerNumber = 0;
-    long fractionalNumberWithIntagerIntegerfractionalNumber = 0;
-    int fractionalNumberWithIntagerIntegerfractionalPart = 0;
     int rounding;
     printf("Rounding precision: ");
     scanf("%d", &rounding);
 
-    *fractionalNumberReady = (char *)malloc((rounding + 1) * sizeof(char));
-    for (int i = 0; i<rounding; i++) {
-        fractionalNumberWithIntagerInteger = fractionalNumberWithIntagerInteger * 2;
-        fractionalNumberWithIntagerIntegerIntegerNumber = 0;
-        fractionalNumberWithIntagerIntegerfractionalNumber = 0;
-        fractionalNumberWithIntagerIntegerfractionalPart = 0;
-        int tempFractionalPartCount = 0; 
-
-        separator(fractionalNumberWithIntagerInteger, &fractionalNumberWithIntagerIntegerIntegerNumber, &fractionalNumberWithIntagerIntegerfractionalNumber, &tempFractionalPartCount);
-        (*fractionalNumberReady)[i] = fractionalNumberWithIntagerIntegerIntegerNumber + '0';
-        fractionalNumberWithIntagerInteger -= fractionalNumberWithIntagerIntegerIntegerNumber;
+    *fracPartBin = (char *)malloc((rounding + 1) * sizeof(char));
+    for (int i = 0; i < rounding; i++) {
+        fracNum *= 2;
+        int intPart = (int)fracNum;
+        (*fracPartBin)[i] = intPart + '0';
+        fracNum -= intPart;
     }
-    (*fractionalNumberReady)[rounding] = '\0';
+    (*fracPartBin)[rounding] = '\0';
 }
 
 
 int main () {
     
-    double number;
+    double num;
     printf("Input number: ");
-    scanf("%lf", &number);
+    scanf("%lf", &num);
     printf("\n");
-    printf("Your number: %.16g", number);
-    printf("\n");
+
+    long intPart = 0, fracPart = 0;
+    int fracPartlen = 0;
+
+    separator(num, &intPart, &fracPart, &fracPartlen);
+
+    int intPartBinLen = 0;
+    char * intPartBin = int2Bin(intPart, &intPartBinLen);
+
+    printf("integerNumberBinary: %s \n", intPartBin);
+
+    char *fracPartBin;
+    frac2Bin(fracPart, fracPartlen, &fracPartBin);
     
-    long integerNumber, fractionalNumber;
-
-    int fractionalPartCount = 0;
-    separator(number, &integerNumber, &fractionalNumber, &fractionalPartCount);
-
-    int integerNumberTwoSize = 0;
-    
-    char * integerNumberBinary = integerDecimal2Binary(integerNumber, &integerNumberTwoSize);
-
-    printf("integerNumberBinary: %s \n", integerNumberBinary);
-
-    char *fractionalNumberReady;
-    fractionalDecimal2Binary(fractionalNumber, fractionalPartCount, &fractionalNumberReady);
-    
-    printf("fractionalNumberBinary: %s", fractionalNumberReady);
+    printf("fractionalNumberBinary: %s", fracPartBin);
     return 0;
 }
